@@ -1,20 +1,22 @@
-cabal-version:       >=1.10
-name:                example
-version:             0.1.0.0
-build-type:          Simple
+cabal-version: >=1.10
+name:          example
+version:       0.1.0.0
+build-type:    Simple
 
 executable example
-  build-depends:
-    base,
-    grpc-haskell,
-    grpc-haskell-core,
-    proto3-suite,
-    proto3-wire
-
-  ghc-options: -W -Werror
-
-  main-is: Example.hs
-
-  hs-source-dirs: .
-
-  default-language: Haskell2010
+    main-is:          Example.hs
+    hs-source-dirs:   .
+    other-modules:    ExampleService
+    default-language: Haskell2010
+    ghc-options:      -W -Werror
+    build-depends:
+        base -any,
+        grpc-haskell -any,
+        grpc-haskell-core -any,
+        proto3-suite -any,
+        proto3-wire -any,
+        deepseq -any,
+        bytestring -any,
+        containers -any,
+        text -any,
+        vector -any

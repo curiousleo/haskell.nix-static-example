@@ -4,7 +4,6 @@
 
 args@{ overlays ? [ ], ... }:
 let
-  example = pkgs: (pkgs.callPackage ./example.nix { }).example;
   combinedOverlays = overlays ++
     [
       (_self: super: {
@@ -20,7 +19,7 @@ let
             "-DBUILD_SHARED_LIBS=OFF"
             "-DgRPC_BUILD_CODEGEN=OFF"
           ];
-          buildInputs = old.buildInputs ++ [ self.libnsl ];
+          buildInputs = old.buildInputs ++ [ self.libnsl self.libcxx ];
         });
       })
     ];
