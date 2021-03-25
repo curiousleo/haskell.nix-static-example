@@ -18,6 +18,8 @@ Update the haskell.nix version:
 
     ./update-nixpkgs.sh
 
+Then update the `index-state` in `example.nix`.
+
 Regenerate gRPC service:
 
     ./generate-service.sh
