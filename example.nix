@@ -38,12 +38,12 @@ pkgs.haskell-nix.cabalProject {
       packages.grpc-haskell.src = grpc-haskell-src;
 
       # These don't help :/
-      #packages.example.components.exes.example.configureFlags = optionals isMusl [
+      #packages.example.components.exes.example.configureFlags = pkgs.lib.mkForce (optionals isMusl [
       #  "--disable-executable-dynamic"
       #  "--disable-shared"
       #  "--ghc-option=-optl=-pthread"
       #  "--ghc-option=-optl=-static"
-      #];
+      #]);
     }
   ];
 
