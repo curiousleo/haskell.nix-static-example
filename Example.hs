@@ -4,9 +4,9 @@
 module Main where
 
 import ExampleService
-import Network.GRPC.LowLevel
-import Network.GRPC.HighLevel.Server
 import Network.GRPC.HighLevel.Generated (defaultServiceOptions)
+import Network.GRPC.HighLevel.Server
+import Network.GRPC.LowLevel
 
 doHandler :: ServerRequest 'Normal DoRequest DoResponse -> IO (ServerResponse 'Normal DoResponse)
 doHandler (ServerNormalRequest _meta (DoRequest {})) =

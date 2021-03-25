@@ -3,10 +3,18 @@ let
   isMusl = pkgs.stdenv.hostPlatform.isMusl;
   optionals = pkgs.lib.optionals;
   grpc-haskell-src =
+    # To be released as version 0.1.0
     pkgs.fetchgit {
       url = "https://github.com/awakesecurity/gRPC-haskell.git";
-      sha256 = "0ywdww4bg3w088292lymh4xv2vbb8i2pqqh02pbf69lgmw1j4k28";
-      rev = "0c57ab0785d34afcbb7c7832bf836f1a10cb450c";
+      sha256 = "186g46b4zyjpqylikhfrwl7gq1vqa2b6jv40h786ayc8njgkrk6j";
+      rev = "1bdc3662db13686f5e4941f3cc506f6fdf11ce32";
+    };
+  proto3-suite-src =
+    # To be released as version 0.4.1
+    pkgs.fetchgit {
+      url = "https://github.com/awakesecurity/proto3-suite.git";
+      sha256 = "1szana07fkjyi64a6p5pxijspc4d9735iv8jzfbgnxabdj0gnfi1";
+      rev = "c40e73eb9a10e32d033aea3e2c8335af6c4c0926";
     };
 in
 pkgs.haskell-nix.cabalProject {
@@ -14,6 +22,7 @@ pkgs.haskell-nix.cabalProject {
   modules = [
     {
       packages.proto3-suite = {
+        src = proto3-suite-src;
         flags.dhall = false;
         components.tests.test.buildable = pkgs.lib.mkForce false;
       };
@@ -42,5 +51,5 @@ pkgs.haskell-nix.cabalProject {
   compiler-nix-name = "ghc8104";
 
   # Fix inputs.
-  index-state = "2021-03-16T21:48:58Z";
+  index-state = "2021-03-24T00:00:00Z";
 }
