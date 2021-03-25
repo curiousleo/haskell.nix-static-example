@@ -1,0 +1,9 @@
+syntax = "proto3";
+package example;
+
+service ExampleService {
+  rpc Do(DoRequest) returns (DoResponse);
+}
+
+message DoRequest {}
+message DoResponse {}
