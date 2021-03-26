@@ -47,4 +47,4 @@ jobs:
         restore-keys: |
           ${{ env.cache-name }}-
 
-    - run: build-dynamic.sh
+    - run: ./build-dynamic.sh
