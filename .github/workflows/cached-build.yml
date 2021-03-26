@@ -1,0 +1,50 @@
+name: cached-build
+
+on:
+  pull_request:
+
+jobs:
+  cached-build:
+    name: Nix build using GitHub action cache
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: |
+        # https://www.tweag.io/blog/2019-11-21-untrusted-ci/
+        (
+        cat <<EOF
+        #!/usr/bin/env sh
+        set -eu
+        set -f # disable globbing
+        export IFS=' '
+
+        echo "DRV_PATH: $DRV_PATH"
+        echo "OUT_PATHS: $OUT_PATHS"
+        if [ -z "$OUT_PATHS" ]; then
+          echo "OUT_PATHS is empty"
+          exit 0
+        fi
+        exec /nix/var/nix/profiles/default/bin/nix copy --to /tmp/cache $OUT_PATHS
+        EOF
+        ) >/tmp/nix-upload-to-cache.sh
+        chmod +x /tmp/nix-upload-to-cache.sh
+      shell: bash
+
+    - uses: cachix/install-nix-action@v12
+      with:
+        extra_nix_config: |
+          trusted-public-keys = hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+          substituters = https://hydra.iohk.io
+          post-build-hook = /tmp/nix-upload-to-cache.sh
+
+    - uses: actions/cache@v2
+      env:
+        cache-name: cached-build-v1
+      with:
+        path: /tmp/cache
+        key: ${{ env.cache-name }}-${{ hashFiles('*.nix') }} }}
+        restore-keys: |
+          ${{ env.cache-name }}-
+
+    - run: build-dynamic.sh
