@@ -8,10 +8,6 @@ Build a dynamically linked executable:
 
     ./build-dynamic.sh
 
-Build a statically linked executable:
-
-    ./build-static.sh
-
 # Update
 
 Update the haskell.nix version:
