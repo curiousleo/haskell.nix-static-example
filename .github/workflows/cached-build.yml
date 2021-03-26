@@ -27,6 +27,7 @@ jobs:
           echo "$p" >>/tmp/cache/paths
         done
 
+        /nix/var/nix/profiles/default/bin/nix sign-paths --key-file /etc/nix/key.private $OUT_PATHS
         exec /nix/var/nix/profiles/default/bin/nix copy --to file:///tmp/cache $OUT_PATHS
         EOF
         ) >/tmp/nix-cache.sh
@@ -42,7 +43,7 @@ jobs:
     - uses: actions/cache@v2
       id: cache
       env:
-        cache-name: cached-build-v2
+        cache-name: cached-build-v3
       with:
         path: /tmp/cache
         key: ${{ env.cache-name }}-${{ hashFiles('*.nix') }} }}
