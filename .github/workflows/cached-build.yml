@@ -10,21 +10,29 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - run: |
-        # https://www.tweag.io/blog/2019-11-21-untrusted-ci/
+    - name: Set up Nix post-build-hook
+      run: |
+        # https://nixos.org/manual/nix/stable/#idm140737321149104
         (
         cat <<'EOF'
-        #!/usr/bin/env sh
-        set -eu
-        set -f # disable globbing
+        #!/bin/sh
+        set -euf
         export IFS=' '
 
-        echo "Caching $OUT_PATHS for $DRV_PATH."
+        echo "DRV_PATH  = $DRV_PATH"
+        echo "OUT_PATHS = $OUT_PATHS"
+
+        mkdir -p /tmp/cache
+
+        echo "$DRV_PATH" >>/tmp/cache/paths
+        for p in "$OUT_PATHS"; do
+          echo "$p" >>/tmp/cache/paths
+        done
+
         exec /nix/var/nix/profiles/default/bin/nix copy --to file:///tmp/cache $OUT_PATHS
         EOF
-        ) >/tmp/nix-upload-to-cache.sh
-        chmod +x /tmp/nix-upload-to-cache.sh
-      shell: bash
+        ) >/tmp/nix-cache.sh
+        chmod +x /tmp/nix-cache.sh
 
     - uses: cachix/install-nix-action@v12
       with:
@@ -32,9 +40,10 @@ jobs:
         extra_nix_config: |
           trusted-public-keys = hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
           substituters = https://hydra.iohk.io
-          post-build-hook = /tmp/nix-upload-to-cache.sh
+          post-build-hook = /tmp/nix-cache.sh
 
     - uses: actions/cache@v2
+      id: cache
       env:
         cache-name: cached-build-v1
       with:
@@ -43,4 +52,8 @@ jobs:
         restore-keys: |
           ${{ env.cache-name }}-
 
-    - run: ./build-dynamic.sh
+    - name: Restore from Nix cache
+      if: steps.cache.outputs.cache-hit == 'true'
+      run: xargs nix copy --from file:///tmp/cache </tmp/cache/paths
+
+    - run: nix-build nixpkgs.nix -A hello
