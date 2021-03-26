@@ -1,0 +1,62 @@
+name: cached-build
+
+on:
+  pull_request:
+
+jobs:
+  cached-build:
+    name: Nix build using GitHub action cache
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Write local build cache key
+      run: |
+        # Generated with nix-store --generate-binary-cache-key github-build-cache key.private key.public
+        echo 'github-build-cache:bZ7J1cWdeZpo5l6Fw20ulXVV2AzMNbjKMTwyGPomm60zk5O21Td8yFAMdKy4WLPbGyjznkdUm6GXM9N5u3LzMQ==' >/tmp/key.private
+
+    - name: Set up Nix post-build-hook
+      run: |
+        # https://nixos.org/manual/nix/stable/#idm140737321149104
+        (
+        cat <<'EOF'
+        #!/bin/sh
+        set -euf
+        export IFS=' '
+
+        echo "DRV_PATH  = $DRV_PATH"
+        echo "OUT_PATHS = $OUT_PATHS"
+
+        mkdir -p /tmp/cache
+        for p in "$OUT_PATHS"; do
+          echo "$p" >>/tmp/cache/paths
+        done
+
+        /nix/var/nix/profiles/default/bin/nix sign-paths --key-file /tmp/key.private $OUT_PATHS
+        exec /nix/var/nix/profiles/default/bin/nix copy --verbose --to file:///tmp/cache $OUT_PATHS
+        EOF
+        ) >/tmp/nix-cache.sh
+        chmod +x /tmp/nix-cache.sh
+
+    - uses: cachix/install-nix-action@v12
+      with:
+        extra_nix_config: |
+          trusted-public-keys = hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= github-build-cache:M5OTttU3fMhQDHSsuFiz2xso855HVJuhlzPTebty8zE=
+          substituters = https://hydra.iohk.io
+          post-build-hook = /tmp/nix-cache.sh
+
+    - uses: actions/cache@v2
+      id: cache
+      env:
+        cache-name: cached-build-v5
+      with:
+        path: /tmp/cache
+        key: ${{ env.cache-name }}-${{ hashFiles('*.nix') }} }}
+        restore-keys: |
+          ${{ env.cache-name }}-
+
+    - name: Restore from Nix cache
+      if: steps.cache.outputs.cache-hit == 'true'
+      run: xargs nix copy --verbose --from file:///tmp/cache </tmp/cache/paths
+
+    - run: ./build-dynamic.sh
