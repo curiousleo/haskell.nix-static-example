@@ -19,13 +19,8 @@ jobs:
         set -f # disable globbing
         export IFS=' '
 
-        echo "DRV_PATH: $DRV_PATH"
-        echo "OUT_PATHS: $OUT_PATHS"
-        if [ -z "$OUT_PATHS" ]; then
-          echo "OUT_PATHS is empty"
-          exit 0
-        fi
-        exec /nix/var/nix/profiles/default/bin/nix copy --to /tmp/cache $OUT_PATHS
+        echo "Caching $OUT_PATHS for $DRV_PATH."
+        exec /nix/var/nix/profiles/default/bin/nix copy --to file:///tmp/cache $OUT_PATHS
         EOF
         ) >/tmp/nix-upload-to-cache.sh
         chmod +x /tmp/nix-upload-to-cache.sh
