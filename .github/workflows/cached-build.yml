@@ -33,7 +33,7 @@ jobs:
         done
 
         /nix/var/nix/profiles/default/bin/nix sign-paths --key-file /tmp/key.private $OUT_PATHS
-        exec /nix/var/nix/profiles/default/bin/nix copy --to file:///tmp/cache $OUT_PATHS
+        exec /nix/var/nix/profiles/default/bin/nix copy --verbose --to file:///tmp/cache $OUT_PATHS
         EOF
         ) >/tmp/nix-cache.sh
         chmod +x /tmp/nix-cache.sh
@@ -57,6 +57,6 @@ jobs:
 
     - name: Restore from Nix cache
       if: steps.cache.outputs.cache-hit == 'true'
-      run: xargs nix copy --from file:///tmp/cache </tmp/cache/paths
+      run: xargs nix copy --verbose --from file:///tmp/cache </tmp/cache/paths
 
     - run: ./build-dynamic.sh
