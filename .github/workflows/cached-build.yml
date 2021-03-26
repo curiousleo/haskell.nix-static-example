@@ -33,6 +33,7 @@ jobs:
 
     - uses: cachix/install-nix-action@v12
       with:
+        install_url: https://releases.nixos.org/nix/nix-2.3.9/install
         extra_nix_config: |
           trusted-public-keys = hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
           substituters = https://hydra.iohk.io
